@@ -3,6 +3,7 @@ const express =require('express');
 const bodyparser=require('body-parser');
 const ejs =require('ejs');
 const mongoose=require('mongoose');
+const encrypt=require('mongoose-encryption');
 const app=express();
 app.use(bodyparser.urlencoded({extended:true}));
 app.set('view engine','ejs');
@@ -18,10 +19,12 @@ socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
 family: 4 // Use IPv4, skip trying IPv6
 }
 mongoose.connect('mongodb://localhost:27017/userDB',options);
-const userSchema={
+const userSchema= new mongoose.Schema({
   email:String,
   password:String
-};
+});
+const secret='thisisourlittlesecret';
+userSchema.plugin(encrypt,{secret:secret,encryptedFields:['password']});
 const User=mongoose.model('user',userSchema);
 app.get('/',function(req,res){
   res.render('home');
